@@ -6,6 +6,7 @@ authors = ["Fred Yankowski <fcy@imsa.edu>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
+pytezos = { git = "https://github.com/murbard/pytezos.git" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

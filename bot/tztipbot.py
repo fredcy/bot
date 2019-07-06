@@ -39,7 +39,7 @@ def ping(message):
 
 
 def keys(message):
-    keychain = Keychain("vendor/secret_keys")
+    keychain = Keychain("secret_keys")
     content = {
         "body": str(keychain.list_keys()),
         "msgtype": "m.notice",
@@ -67,7 +67,9 @@ def head(message):
 
     content = {
         "body": pprint.pformat(head['header']),
+        "formatted_body": "<pre><code>" + pprint.pformat(head['header']) + "</code></pre",
         "msgtype": "m.notice",
+        "format": "org.matrix.custom.html",
     }
     return [content]
 

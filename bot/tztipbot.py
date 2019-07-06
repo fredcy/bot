@@ -74,12 +74,14 @@ def head(message):
     return [content]
 
 def sign(message):
-    keychain = Keychain("vendor/secret_keys")
+    keychain = Keychain("secret_keys")
     key = keychain.get_key('foobar')
 
     signature = key.sign(message['body'])
     content = {
         "body": signature,
+        "formatted_body": "<pre><code>" + signature + "</code></pre>",
         "msgtype": "m.notice",
+        "format": "org.matrix.custom.html",
     }
     return [content]

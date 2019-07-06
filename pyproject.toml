@@ -2,12 +2,12 @@
 name = "bot"
 version = "0.1.0"
 description = ""
-authors = ["Fred Yankowski <fcy@imsa.edu>"]
+authors = ["Fred Yankowski <fred@yankowski.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
 pytezos = { git = "https://github.com/murbard/pytezos.git" }
-matrix-nio = { git = "https://github.com/poljar/matrix-nio.git" }
+matrix-nio = { git = "https://github.com/poljar/matrix-nio.git", branch = "master" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

@@ -43,3 +43,12 @@ Invite the bot's account to some matrix room for testing. Accept that invitation
 ```
 poetry run python bot/main.py
 ```
+
+# References
+
++ pytezos: https://github.com/murbard/pytezos
+
++ matrix-nio: https://github.com/poljar/matrix-nio
+
++ poetry: https://github.com/sdispater/poetry
+

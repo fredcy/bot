@@ -1,4 +1,4 @@
-# bot
+# tz-matrix-bot
 
 Build a Tezos bot based on the matrix-nio client library.
 
@@ -41,7 +41,7 @@ Invite the bot's account to some matrix room for testing. Accept that invitation
 ## Run
 
 ```
-poetry run python bot/main.py
+poetry run python tzbot/main.py
 ```
 
 # References

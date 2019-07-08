@@ -211,7 +211,7 @@ python = ">=3.6"
 version = "*"
 
 [package.source]
-reference = "9b39bbf5dce867db395141476451fce8cc31df90"
+reference = "454af17fef9a0d21806b46d9c6790d8f356a6b18"
 type = "git"
 url = "https://github.com/poljar/matrix-nio.git"
 [[package]]

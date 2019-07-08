@@ -27,6 +27,9 @@ def received_message(message):
     elif body.startswith("!sign"):
         outputs += sign(message)
 
+    elif body.startswith("!constants"):
+        outputs += constants(message)
+
     return outputs
 
 
@@ -85,3 +88,54 @@ def sign(message):
         "format": "org.matrix.custom.html",
     }
     return [content]
+
+def constants(message):
+    node_url = "http://f.ostraca.org:8732"
+    node = Node(node_url)
+    constants = node.get("/chains/main/blocks/head/context/constants")
+    content = code_notice(pprint.pformat(constants))
+    return [content]
+
+
+def code_notice(code):
+    return {
+        "body": code,
+        "formatted_body": "<pre><code>" + code + "</code></pre>",
+        "msgtype": "m.notice",
+        "format": "org.matrix.custom.html",
+    }
+
+# several alphanet accounts of mine
+fy_pkh = "tz1fyYJwgV1ozj6RyjtU1hLTBeoqQvQmRjVv"
+foobar_pkh = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
+
+def transaction(message):
+    head_hash = get_head_hash()
+
+    constants = get_constants()
+
+    source = fy_pkh
+    destination = foobar_pkh
+    amount = 42 * 1000000
+    fee = 1000                  # TODO
+    storage_limit = 60000       # TODO
+
+    operation = {
+        'branch': head_hash,
+        'contents': [
+            {
+                'kind': "transaction",
+                "source": fy_pkh,
+                "fee": str(fee),
+                "counter": str(counter),
+                "gas_limit": constants['hard_gas_limit_per_operation'],
+                "storage_limit": str(storage_limit),
+                "amount": str(amount),
+                "destination": foobar_pkh,
+            }
+        ]
+    }
+
+
+
+    

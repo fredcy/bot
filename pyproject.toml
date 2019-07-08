@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bot"
+name = "tzbot"
 version = "0.1.0"
 description = ""
 authors = ["Fred Yankowski <fred@yankowski.com>"]

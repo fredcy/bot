@@ -2,9 +2,9 @@ import json
 import pprint
 import sys
 
-sys.path.append('./vendor/pytezos')
 from pytezos.tools.keychain import Keychain
 from pytezos.rpc.node import Node
+from pytezos.rpc.shell import Shell
 
 
 def received_message(message):
@@ -65,13 +65,14 @@ def key(message):
 
 def head(message):
     node_url = "http://f.ostraca.org:8732"
-    node = Node(node_url)
+    shell = Shell(Node(node_url))
+    head = shell.head()
 
-    head = node.get("/chains/main/blocks/head")
+    body = pprint.pformat(head.get("header"))
 
     content = {
-        "body": pprint.pformat(head['header']),
-        "formatted_body": "<pre><code>" + pprint.pformat(head['header']) + "</code></pre",
+        "body": body,
+        "formatted_body": "<pre><code>" + body + "</code></pre",
         "msgtype": "m.notice",
         "format": "org.matrix.custom.html",
     }
@@ -92,13 +93,15 @@ def sign(message):
 
 def constants(message):
     node_url = "http://f.ostraca.org:8732"
-    node = Node(node_url)
-    constants = node.get("/chains/main/blocks/head/context/constants")
+    shell = Shell(Node(node_url))
+
+    constants = shell.head.context.constants()
     content = code_notice(pprint.pformat(constants))
     return [content]
 
 
 def code_notice(code):
+    ''' Create m.notice message content with formatted code '''
     return {
         "body": code,
         "formatted_body": "<pre><code>" + code + "</code></pre>",
@@ -116,25 +119,3 @@ def transaction(message):
     constants = get_constants()
     trans_oper = make_transaction_operation(fy_pkh, foobar_pkh, 42 * 1000000, head_hash)
 
-
-def make_transaction_operation(source, destination, amount, branch,
-                               fee=1, counter=1, gas_limit=800000, storage_limit=60000,
-                               signature=None) -> str:
-    operation = {
-        'branch': branch,
-        'contents': [
-            {
-                'kind': "transaction",
-                "source": source,
-                "fee": str(fee),
-                "counter": str(counter),
-                "gas_limit": str(gas_limit),
-                "storage_limit": str(storage_limit),
-                "amount": str(amount),
-                "destination": destination,
-            }
-        ],
-    }
-    if signature:
-        operation['signature'] = signature
-    return json.dumps(operation, indent=4)

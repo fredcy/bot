@@ -1,3 +1,5 @@
+import json
+
 from pytezos.rpc.shell import Shell, Node
 
 

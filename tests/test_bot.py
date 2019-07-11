@@ -1,4 +1,5 @@
 import json
+print(json)
 import logging
 import unittest
 
@@ -9,6 +10,7 @@ from tzbot.tezos import make_transaction_operation
 
 logger = logging.getLogger()
 
+print(json)
 
 class TestBot(unittest.TestCase):
     def setUp(self):

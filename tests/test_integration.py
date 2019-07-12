@@ -1,8 +1,9 @@
 import json
 import logging
+import pprint
 import unittest
 
-from pytezos.rpc.node import Node
+from pytezos.rpc.node import Node, RpcError
 from pytezos.rpc.shell import Shell
 
 import tzbot.tezos as tezos
@@ -46,9 +47,10 @@ class TestPytezos(unittest.TestCase):
         self.assertIsNotNone(constants.get("blocks_per_cycle"))
 
     def test_counter(self):
-        contracts = self.shell.head.context.contracts()
-        logger.debug(f"contracts = {contacts}")
-        #self.assertIsNotNone(counter)
+        contract = self.shell.head.context.contracts[self.pkh1]
+        #logger.debug(f"contract = {contract}")
+        counter = contract.counter()
+        self.assertIsNotNone(counter)
 
 
 class TestTezos(unittest.TestCase):
@@ -60,14 +62,27 @@ class TestTezos(unittest.TestCase):
         self.pkh2 = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
         self.fake_sig = "edsigtXomBKi5CTRf5cjATJWSyaRvhfYNHqSUGrn4SdbYRcGwQrUGjzEfQDTuqHhuA8b2d8NarZjz8TRf65WkpQmo423BtomS8Q"
 
-    def test_transaction(self):
+    def test_transaction_low_level(self):
         head_hash = self.shell.head.hash()
-        trans_oper_json = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
-                                                           signature=self.fake_sig)
-        logger.debug(f"oper = {trans_oper_json}")
-        resp = self.node.post("/chains/main/blocks/head/helpers/scripts/run_operation", json=trans_oper_json)
-        logger.debug(f"resp = {resp}")
-        
+        contract = self.shell.head.context.contracts[self.pkh1]
+        counter = int(contract.counter()) + 1
+
+        trans_oper = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
+                                                           signature=self.fake_sig, counter=counter)
+        #logger.debug(f"oper = {trans_oper_json}")
+        try:
+            resp = self.node.post("/chains/main/blocks/head/helpers/scripts/run_operation",
+                                  json=trans_oper)
+        except RpcError as exc:
+            self.fail(f"RpcError fail: {exc}")
+        except Exception as exc:
+            self.fail(f"post exception: {exc}")
+        else:
+            #logger.debug(f"resp = {resp}")
+            resp_oper = resp['contents'][0]
+            self.assertEqual(resp_oper['counter'], str(counter))
+            self.assertEqual(resp_oper['kind'], "transaction")
+            #self.fail(f"STUB:\nresp={pprint.pformat(resp)}")
 
 if __name__ == "__main__":
     unittest.main()

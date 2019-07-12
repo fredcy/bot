@@ -34,4 +34,6 @@ def make_transaction_operation(source, destination, amount, branch,
     }
     if signature:
         operation['signature'] = signature
-    return json.dumps(operation, indent=4)
+
+    #return json.dumps(operation, indent=4)
+    return operation

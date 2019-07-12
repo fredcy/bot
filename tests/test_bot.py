@@ -1,9 +1,8 @@
 import json
-print(json)
 import logging
 import unittest
 
-import sys; print(sys.path)
+#import sys; print(sys.path)
 
 from tzbot import __version__
 from tzbot.tezos import make_transaction_operation 

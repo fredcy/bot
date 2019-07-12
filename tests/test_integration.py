@@ -1,6 +1,6 @@
 import json
 import logging
-import pprint
+from pprint import pformat
 import unittest
 
 from pytezos.rpc.node import Node, RpcError
@@ -62,14 +62,37 @@ class TestTezos(unittest.TestCase):
         self.pkh2 = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
         self.fake_sig = "edsigtXomBKi5CTRf5cjATJWSyaRvhfYNHqSUGrn4SdbYRcGwQrUGjzEfQDTuqHhuA8b2d8NarZjz8TRf65WkpQmo423BtomS8Q"
 
-    def test_transaction_low_level(self):
+    def make_trans_oper(self):
         head_hash = self.shell.head.hash()
         contract = self.shell.head.context.contracts[self.pkh1]
         counter = int(contract.counter()) + 1
-
         trans_oper = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
                                                            signature=self.fake_sig, counter=counter)
-        #logger.debug(f"oper = {trans_oper_json}")
+        return trans_oper
+
+
+    def test_trans_oper(self):
+        trans_oper = self.make_trans_oper()
+        self.assertEqual(len(trans_oper['contents']), 1)
+        oper = trans_oper['contents'][0]
+        self.assertEqual(oper['kind'], 'transaction')
+
+
+    def test_transaction_low_level(self):
+        head_hash = self.shell.head.hash()
+
+        contract = self.shell.head.context.contracts[self.pkh1]
+        counter = int(contract.counter()) + 1
+
+        constants = self.shell.head.context.constants()
+        #logger.debug(f"constants = {pformat(constants)}")
+        gas_limit = constants['hard_gas_limit_per_operation']
+        storage_limit = constants['hard_storage_limit_per_operation']
+
+        trans_oper = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
+                                                      signature=self.fake_sig, counter=counter,
+                                                      gas_limit=gas_limit)
+        #print(f"oper = {pformat(trans_oper)}")
         try:
             resp = self.node.post("/chains/main/blocks/head/helpers/scripts/run_operation",
                                   json=trans_oper)
@@ -78,11 +101,25 @@ class TestTezos(unittest.TestCase):
         except Exception as exc:
             self.fail(f"post exception: {exc}")
         else:
-            #logger.debug(f"resp = {resp}")
+            trans_oper = trans_oper['contents'][0]
             resp_oper = resp['contents'][0]
-            self.assertEqual(resp_oper['counter'], str(counter))
+            self.assertEqual(resp_oper['counter'], trans_oper['counter'])
             self.assertEqual(resp_oper['kind'], "transaction")
-            #self.fail(f"STUB:\nresp={pprint.pformat(resp)}")
+
+            result = resp_oper['metadata']['operation_result']
+            self.assertEqual(result['status'], 'applied', f'result = {pformat(result)}')
+
+            consumed_gas = int(result['consumed_gas'])
+            self.assertGreater(consumed_gas, 1000)
+
+            trans_oper2 = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
+                                                           signature=self.fake_sig, counter=counter,
+                                                           gas_limit=consumed_gas)
+
+            ## TODO : forge and inject transaction
+
+            #self.fail(f"STUB:\nresp={pformat(resp)}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,7 +15,7 @@ class Tezos:
 
 
 def make_transaction_operation(source, destination, amount, branch,
-                               fee=1284, counter=1, gas_limit=800000, storage_limit=60000,
+                               fee=5000, counter=1, gas_limit=800000, storage_limit=60000,
                                protocol=None, signature=None) -> dict:
     operation = {
         'branch': branch,

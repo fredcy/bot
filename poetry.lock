@@ -194,7 +194,7 @@ description = "A Python Matrix client library, designed according to sans I/O pr
 name = "matrix-nio"
 optional = false
 python-versions = "*"
-version = "0.3"
+version = "0.4"
 
 [package.dependencies]
 attrs = "*"
@@ -211,7 +211,7 @@ python = ">=3.6"
 version = "*"
 
 [package.source]
-reference = "a73c7c3dc8b9d0502e5677ee15ef8f5bb28b1f50"
+reference = "a7a35f18f9bc2f031647c48870aea0f80ff92960"
 type = "git"
 url = "https://github.com/poljar/matrix-nio.git"
 [[package]]

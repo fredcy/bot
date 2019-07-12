@@ -15,8 +15,8 @@ class Tezos:
 
 
 def make_transaction_operation(source, destination, amount, branch,
-                               fee=1, counter=1, gas_limit=800000, storage_limit=60000,
-                               signature=None) -> str:
+                               fee=1284, counter=1, gas_limit=800000, storage_limit=60000,
+                               protocol=None, signature=None) -> dict:
     operation = {
         'branch': branch,
         'contents': [
@@ -34,6 +34,9 @@ def make_transaction_operation(source, destination, amount, branch,
     }
     if signature:
         operation['signature'] = signature
+
+    if protocol:
+        operation['protocol'] = protocol
 
     #return json.dumps(operation, indent=4)
     return operation

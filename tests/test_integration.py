@@ -2,9 +2,12 @@ import json
 import logging
 from pprint import pformat
 import unittest
+from binascii import hexlify, unhexlify
 
 from pytezos.rpc.node import Node, RpcError
 from pytezos.rpc.shell import Shell
+from pytezos.tools.keychain import Keychain
+from pytezos.encoding import base58_decode
 
 import tzbot.tezos as tezos
 
@@ -112,13 +115,46 @@ class TestTezos(unittest.TestCase):
             consumed_gas = int(result['consumed_gas'])
             self.assertGreater(consumed_gas, 1000)
 
+            storage_used = 0    # TODO: how to get this? not appearing in results from scriptless address
+
+            protocols = self.shell.head.protocols()
+            protocol = protocols.get("protocol")
+            self.assertRegex(protocol, r"^P")
+
             trans_oper2 = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
-                                                           signature=self.fake_sig, counter=counter,
-                                                           gas_limit=consumed_gas)
+                                                           counter=counter,
+                                                           gas_limit=consumed_gas+100,
+                                                           storage_limit=0)
 
-            ## TODO : forge and inject transaction
+            resp2 = self.node.post("/chains/main/blocks/head/helpers/forge/operations",
+                                  json=trans_oper2)
+            self.assertRegex(resp2, r"^[a-f0-9]+$")
+            oper_hex = resp2
 
-            #self.fail(f"STUB:\nresp={pformat(resp)}")
+            keychain = Keychain("secret_keys")
+            key = keychain.get_key("fy") # TODO: name corresponds to self.pkh1
+
+            signature = key.sign("03" + oper_hex)
+            self.assertRegex(signature, r"^edsig")
+
+            trans_oper3 = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,
+                                                           counter=counter,
+                                                           gas_limit=consumed_gas+100,
+                                                           storage_limit=0,
+                                                           protocol=protocol,
+                                                           signature=signature)
+            resp3 = self.node.post("/chains/main/blocks/head/helpers/preapply/operations",
+                                   json=[trans_oper3])
+
+            raw_signature = base58_decode(signature.encode())
+            hex_signature = raw_signature.hex()
+            logger.debug(f"raw_signature = {raw_signature}")
+            logger.debug(f"hex_signature = {hex_signature}")
+
+            signed_oper_hex = oper_hex + hex_signature
+
+            resp4 = self.node.post("/injection/operation?chain=main", signed_oper_hex)
+            logger.debug(f"\nresp4 = {pformat(resp4)}\n")
 
 
 if __name__ == "__main__":

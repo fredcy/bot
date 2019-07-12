@@ -9,7 +9,6 @@ from tzbot.tezos import make_transaction_operation
 
 logger = logging.getLogger()
 
-print(json)
 
 class TestBot(unittest.TestCase):
     def setUp(self):
@@ -24,10 +23,8 @@ class TestBot(unittest.TestCase):
 
     def test_make_trans_sig(self):
         counter = 26146
-        trans_oper_json = make_transaction_operation(self.pkh1, self.pkh2, 42, self.branch,
-                                                     counter=counter, signature=self.fake_sig)
-        logger.debug(trans_oper_json)
-        trans_oper = json.loads(trans_oper_json)
+        trans_oper = make_transaction_operation(self.pkh1, self.pkh2, 42, self.branch,
+                                                counter=counter, signature=self.fake_sig)
 
         self.assertEqual(trans_oper['branch'], self.branch)
         self.assertEqual(trans_oper['contents'][0]['source'], self.pkh1)
@@ -36,17 +33,13 @@ class TestBot(unittest.TestCase):
 
     def test_make_trans(self):
         counter = 26146
-        trans_oper_json = make_transaction_operation(self.pkh1, self.pkh2, 42, self.branch,
-                                                     counter=counter)
-        logger.debug(trans_oper_json)
-        trans_oper = json.loads(trans_oper_json)
+        trans_oper = make_transaction_operation(self.pkh1, self.pkh2, 42, self.branch,
+                                                counter=counter)
 
         self.assertEqual(trans_oper['branch'], self.branch)
         self.assertEqual(trans_oper['contents'][0]['source'], self.pkh1)
         self.assertEqual(trans_oper['contents'][0]['counter'], str(counter))
         self.assertEqual(trans_oper.get('signature'), None)
-
-
 
 
 if __name__ == "__main__":

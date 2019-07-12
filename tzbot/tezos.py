@@ -38,5 +38,4 @@ def make_transaction_operation(source, destination, amount, branch,
     if protocol:
         operation['protocol'] = protocol
 
-    #return json.dumps(operation, indent=4)
     return operation

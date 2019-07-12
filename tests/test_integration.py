@@ -1,5 +1,7 @@
+import configparser
 import json
 import logging
+import os.path
 from pprint import pformat
 import unittest
 from binascii import hexlify, unhexlify
@@ -58,11 +60,25 @@ class TestPytezos(unittest.TestCase):
 
 class TestTezos(unittest.TestCase):
     def setUp(self):
-        rpc_url = "http://f.ostraca.org:8732/"
+        config = configparser.ConfigParser()
+        config_filename = os.path.expanduser("~/.tzbot")
+        with open(config_filename) as config_file:
+            config.read_file(config_file)
+
+        #rpc_url = "http://f.ostraca.org:8732/"
+        rpc_url = config['test']['rpc_url']
         self.node = Node(rpc_url)
         self.shell = Shell(self.node)
-        self.pkh1 = "tz1fyYJwgV1ozj6RyjtU1hLTBeoqQvQmRjVv"
-        self.pkh2 = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
+
+        keychain = Keychain(os.path.expanduser(config['test']['keychain']))
+
+        name1 = config['test']['name1']
+        name2 = config['test']['name2']
+        self.key1 = keychain.get_key(name1)
+        self.key2 = keychain.get_key(name2)
+        self.pkh1 = self.key1.public_key_hash()
+        self.pkh2 = self.key2.public_key_hash()
+
         self.fake_sig = "edsigtXomBKi5CTRf5cjATJWSyaRvhfYNHqSUGrn4SdbYRcGwQrUGjzEfQDTuqHhuA8b2d8NarZjz8TRf65WkpQmo423BtomS8Q"
 
     def make_trans_oper(self):
@@ -83,7 +99,6 @@ class TestTezos(unittest.TestCase):
 
     def test_transaction_low_level(self):
         try:
-
             head_hash = self.shell.head.hash()
 
             contract = self.shell.head.context.contracts[self.pkh1]
@@ -128,10 +143,7 @@ class TestTezos(unittest.TestCase):
             self.assertRegex(resp2, r"^[a-f0-9]+$")
             oper_hex = resp2
 
-            keychain = Keychain("secret_keys")
-            key = keychain.get_key("fy") # TODO: name corresponds to self.pkh1
-
-            signature = key.sign("03" + oper_hex)
+            signature = self.key1.sign("03" + oper_hex)
             self.assertRegex(signature, r"^edsig")
 
             trans_oper3 = tezos.make_transaction_operation(self.pkh1, self.pkh2, 17, head_hash,

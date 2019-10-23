@@ -2,9 +2,10 @@ import json
 import pprint
 import sys
 
-from pytezos.tools.keychain import Keychain
-from pytezos.rpc.node import Node
-from pytezos.rpc.shell import Shell
+from pytezos.crypto import Key
+
+#from pytezos.rpc.node import Node
+#from pytezos.rpc.shell import Shell
 
 
 def received_message(message):
@@ -16,20 +17,8 @@ def received_message(message):
     if body.startswith("!ping"):
         outputs += ping(message)
 
-    elif body.startswith("!keys"):
-        outputs += keys(message)
-
     elif body.startswith("!key"):
         outputs += key(message)
-
-    elif body.startswith("!head"):
-        outputs += head(message)
-
-    elif body.startswith("!sign"):
-        outputs += sign(message)
-
-    elif body.startswith("!constants"):
-        outputs += constants(message)
 
     return outputs
 
@@ -39,22 +28,16 @@ def ping(message):
     return [content]
 
 
-def keys(message):
-    keychain = Keychain("secret_keys")
-    content = {"body": str(keychain.list_keys()), "msgtype": "m.notice"}
-    return [content]
-
-
 def key(message):
-    keychain = Keychain("vendor/secret_keys")
-    key = keychain.get_key("foobar")
+    key = Key.from_alias("fy", tezos_client_dir=".")
     pk = key.public_key()
     pkh = key.public_key_hash()
 
-    content = {"body": f"pkh = {pkh}", "msgtype": "m.notice"}
+    content = code_notice(f"pkh = {pkh}")
     return [content]
 
 
+"""
 def head(message):
     node_url = "http://f.ostraca.org:8732"
     shell = Shell(Node(node_url))
@@ -94,6 +77,8 @@ def constants(message):
     return [content]
 
 
+"""
+
 def code_notice(code):
     """ Create m.notice message content with formatted code """
     return {
@@ -105,13 +90,16 @@ def code_notice(code):
 
 
 # several alphanet accounts of mine
+fy_alias = "fy"
 fy_pkh = "tz1fyYJwgV1ozj6RyjtU1hLTBeoqQvQmRjVv"
 foobar_pkh = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
 
 
+"""
 def transaction(message):
     head_hash = get_head_hash()
     constants = get_constants()
     trans_oper = make_transaction_operation(
         fy_pkh, foobar_pkh, 42 * 1_000_000, head_hash
     )
+"""

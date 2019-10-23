@@ -11,7 +11,7 @@ def received_message(message):
     print(f"message: {message}")
 
     outputs = []
-    body = message['body'].strip()
+    body = message["body"].strip()
 
     if body.startswith("!ping"):
         outputs += ping(message)
@@ -35,33 +35,25 @@ def received_message(message):
 
 
 def ping(message):
-    content = {
-        "body": "pong",
-        "msgtype": "m.notice",
-    }
+    content = {"body": "pong", "msgtype": "m.notice"}
     return [content]
 
 
 def keys(message):
     keychain = Keychain("secret_keys")
-    content = {
-        "body": str(keychain.list_keys()),
-        "msgtype": "m.notice",
-    }
+    content = {"body": str(keychain.list_keys()), "msgtype": "m.notice"}
     return [content]
 
 
 def key(message):
     keychain = Keychain("vendor/secret_keys")
-    key = keychain.get_key('foobar')
+    key = keychain.get_key("foobar")
     pk = key.public_key()
     pkh = key.public_key_hash()
 
-    content = {
-        "body": f"pkh = {pkh}",
-        "msgtype": "m.notice",
-    }
+    content = {"body": f"pkh = {pkh}", "msgtype": "m.notice"}
     return [content]
+
 
 def head(message):
     node_url = "http://f.ostraca.org:8732"
@@ -78,11 +70,12 @@ def head(message):
     }
     return [content]
 
+
 def sign(message):
     keychain = Keychain("secret_keys")
-    key = keychain.get_key('foobar')
+    key = keychain.get_key("foobar")
 
-    signature = key.sign(message['body'])
+    signature = key.sign(message["body"])
     content = {
         "body": signature,
         "formatted_body": "<pre><code>" + signature + "</code></pre>",
@@ -90,6 +83,7 @@ def sign(message):
         "format": "org.matrix.custom.html",
     }
     return [content]
+
 
 def constants(message):
     node_url = "http://f.ostraca.org:8732"
@@ -101,7 +95,7 @@ def constants(message):
 
 
 def code_notice(code):
-    ''' Create m.notice message content with formatted code '''
+    """ Create m.notice message content with formatted code """
     return {
         "body": code,
         "formatted_body": "<pre><code>" + code + "</code></pre>",
@@ -114,8 +108,10 @@ def code_notice(code):
 fy_pkh = "tz1fyYJwgV1ozj6RyjtU1hLTBeoqQvQmRjVv"
 foobar_pkh = "tz1Nhj1wHs7nzHSwdybxrYjpEQCTaEpWwu6w"
 
+
 def transaction(message):
     head_hash = get_head_hash()
     constants = get_constants()
-    trans_oper = make_transaction_operation(fy_pkh, foobar_pkh, 42 * 1000000, head_hash)
-
+    trans_oper = make_transaction_operation(
+        fy_pkh, foobar_pkh, 42 * 1_000_000, head_hash
+    )

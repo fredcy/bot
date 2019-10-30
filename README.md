@@ -46,7 +46,7 @@ poetry run python tzbot/main.py
 
 # References
 
-+ pytezos: https://github.com/murbard/pytezos
++ pytezos: https://github.com/baking-bad/pytezos
 
 + matrix-nio: https://github.com/poljar/matrix-nio
 

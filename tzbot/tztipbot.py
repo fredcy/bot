@@ -3,6 +3,7 @@ import pprint
 import sys
 
 from pytezos.crypto import Key
+from pytezos.rpc import RpcProvider
 
 #from pytezos.rpc.node import Node
 #from pytezos.rpc.shell import Shell
@@ -19,6 +20,9 @@ def received_message(message):
 
     elif body.startswith("!key"):
         outputs += key(message)
+
+    elif body.startswith("!head"):
+        outputs += head(message)
 
     return outputs
 
@@ -37,21 +41,18 @@ def key(message):
     return [content]
 
 
-"""
+provider = RpcProvider(
+    babylonnet = "http://babylon.ostez.com",
+)
+
+
 def head(message):
-    node_url = "http://f.ostraca.org:8732"
-    shell = Shell(Node(node_url))
-    head = shell.head()
-
-    body = pprint.pformat(head.get("header"))
-
-    content = {
-        "body": body,
-        "formatted_body": "<pre><code>" + body + "</code></pre",
-        "msgtype": "m.notice",
-        "format": "org.matrix.custom.html",
-    }
+    header = provider.babylonnet.head.header()
+    body = pprint.pformat(header)
+    content = code_notice(body)
     return [content]
+
+"""
 
 
 def sign(message):

@@ -9,21 +9,20 @@ from nio import AsyncClient, LoginResponse, SyncResponse, RoomMessageText
 
 import argparse
 import configparser
-import logging
+import logbook
+import pprint
 import sys
 
-import tztipbot
+from tztipbot import TzTipBot
 
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+log = logbook.Logger("tztipbot")
 
 
 def main():
     config = configparser.ConfigParser()
     with open("config") as config_file:
         config.read_file(config_file)
-    logger.debug(f"{config['client']['homeserver'], config['client']['username']}")
+    log.debug(f"{config['client']['homeserver'], config['client']['username']}")
 
     async_client = AsyncClient(
         config["client"]["homeserver"], config["client"]["username"]
@@ -31,9 +30,9 @@ def main():
     try:
         asyncio.run(amain(async_client, config))
     except KeyboardInterrupt:
-        logger.info("keyboard interrupt")
+        log.info("keyboard interrupt")
     except:
-        logger.exception("async.run failed")
+        log.exception("async.run failed")
 
 
 async def amain(client, config):
@@ -42,7 +41,7 @@ async def amain(client, config):
         if isinstance(response, LoginResponse):
             handle_login_response(client, response)
         else:
-            logger.error(f"unexpected login response: {type(response)}: {response}")
+            log.error(f"unexpected login response: {type(response)}: {response}")
             return
 
         try:
@@ -51,7 +50,7 @@ async def amain(client, config):
         except FileNotFoundError:
             pass
 
-        tzbot = tztipbot.TzTipBot(config["node"]["uri"])
+        tzbot = TzTipBot(config["node"]["uri"])
 
         get_full_state = True  # request full state on first sync only
         while True:
@@ -60,10 +59,10 @@ async def amain(client, config):
                 await handle_sync_response(client, response, tzbot)
                 get_full_state = False
             else:
-                logger.error(f"unexpected response type: {type(response)}: {response}")
+                log.error(f"unexpected response type: {type(response)}: {response}")
 
     except asyncio.CancelledError:
-        logger.info(f"asyncio cancellederror")
+        log.info(f"asyncio cancellederror")
 
     finally:
         # It seems that we can only close our async client from within this
@@ -72,11 +71,11 @@ async def amain(client, config):
 
 
 def handle_login_response(client, response):
-    logger.info(f"login response: {response}")
+    log.info(f"login response: {response}")
 
 
 async def handle_sync_response(client, response, tzbot):
-    logger.debug(f"sync response: {response}")
+    log.debug(f"sync response: {response}")
 
     with open("next_batch", "w") as next_batch_token:
         next_batch_token.write(response.next_batch)
@@ -87,7 +86,7 @@ async def handle_sync_response(client, response, tzbot):
         if len(room.timeline.events) > 0:
             for event in room.timeline.events:
                 if isinstance(event, RoomMessageText):
-                    logger.info(
+                    log.info(
                         f'message in "{display_name}" from {event.sender}: {event.body}'
                     )
 
@@ -99,15 +98,18 @@ async def handle_sync_response(client, response, tzbot):
                         await client.room_send(room_id, "m.room.message", output)
 
                 else:
-                    logger.info(f"event: {type(event)}: {event}")
+                    log.info(f"event: {type(event)}: {event}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="bot based on matrix-nio")
     parser.add_argument("--debug", "-d", action="store_true")
     args = parser.parse_args()
-    logger.debug(f"args = {args}")
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
 
-    main()
+    log_level = logbook.DEBUG if args.debug else logbook.INFO
+    handler = logbook.StderrHandler(level=log_level)
+    # remove record.time from log output
+    handler.format_string = "{record.level_name}: {record.channel}: {record.message}"
+
+    with handler.applicationbound():
+        main()

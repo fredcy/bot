@@ -1,12 +1,13 @@
 import json
 import pprint
 import sys
+import logbook
 
 from pytezos.crypto import Key
 from pytezos.rpc import RpcNode, RpcQuery
 
-# from pytezos.rpc.node import Node
-# from pytezos.rpc.shell import Shell
+
+log = logbook.Logger("tztipbot")
 
 
 class TzTipBot:
@@ -15,7 +16,7 @@ class TzTipBot:
         self.rpcQuery = RpcQuery(RpcNode(uri=self.node_uri))
 
     def received_message(self, message):
-        print(f"message: {message}")
+        log.debug(f"message: {message}")
 
         outputs = []
         body = message["body"].strip()

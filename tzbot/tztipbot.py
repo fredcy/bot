@@ -18,17 +18,28 @@ def received_message(message):
     if body.startswith("!ping"):
         outputs += ping(message)
 
+    elif body.startswith("!echo"):
+        outputs += echo(message)
+
     elif body.startswith("!key"):
         outputs += key(message)
 
     elif body.startswith("!head"):
         outputs += head(message)
 
+    elif body.startswith("!sign"):
+        outputs += sign(message)
+
     return outputs
 
 
 def ping(message):
     content = {"body": "pong", "msgtype": "m.notice"}
+    return [content]
+
+
+def echo(message):
+    content = {"body": f"message.body=\"{message['body']}\"", "msgtype": "m.notice"}
     return [content]
 
 
@@ -52,13 +63,9 @@ def head(message):
     content = code_notice(body)
     return [content]
 
-"""
-
 
 def sign(message):
-    keychain = Keychain("secret_keys")
-    key = keychain.get_key("foobar")
-
+    key = Key.from_alias("fy", tezos_client_dir=".")
     signature = key.sign(message["body"])
     content = {
         "body": signature,
@@ -77,8 +84,6 @@ def constants(message):
     content = code_notice(pprint.pformat(constants))
     return [content]
 
-
-"""
 
 def code_notice(code):
     """ Create m.notice message content with formatted code """

@@ -51,11 +51,13 @@ async def amain(client, config):
         except FileNotFoundError:
             pass
 
+        tzbot = tztipbot.TzTipBot(config['node']['uri'])
+
         get_full_state = True  # request full state on first sync only
         while True:
             response = await client.sync(30000, full_state=get_full_state)
             if isinstance(response, SyncResponse):
-                await handle_sync_response(client, response)
+                await handle_sync_response(client, response, tzbot)
                 get_full_state = False
             else:
                 logger.error(f"unexpected response type: {type(response)}: {response}")
@@ -73,7 +75,7 @@ def handle_login_response(client, response):
     logger.info(f"login response: {response}")
 
 
-async def handle_sync_response(client, response):
+async def handle_sync_response(client, response, tzbot):
     logger.debug(f"sync response: {response}")
 
     with open("next_batch", "w") as next_batch_token:
@@ -89,7 +91,7 @@ async def handle_sync_response(client, response):
                         f'message in "{display_name}" from {event.sender}: {event.body}'
                     )
 
-                    outputs = tztipbot.received_message(
+                    outputs = tzbot.received_message(
                         {"room": room_id, "sender": event.sender, "body": event.body}
                     )
 

@@ -51,7 +51,7 @@ async def amain(client, config):
         except FileNotFoundError:
             pass
 
-        tzbot = tztipbot.TzTipBot(config['node']['uri'])
+        tzbot = tztipbot.TzTipBot(config["node"]["uri"])
 
         get_full_state = True  # request full state on first sync only
         while True:

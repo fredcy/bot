@@ -5,16 +5,14 @@ import sys
 from pytezos.crypto import Key
 from pytezos.rpc import RpcNode, RpcQuery
 
-#from pytezos.rpc.node import Node
-#from pytezos.rpc.shell import Shell
+# from pytezos.rpc.node import Node
+# from pytezos.rpc.shell import Shell
 
 
-class TzTipBot():
-
+class TzTipBot:
     def __init__(self, node_uri):
         self.node_uri = node_uri
         self.rpcQuery = RpcQuery(RpcNode(uri=self.node_uri))
-
 
     def received_message(self, message):
         print(f"message: {message}")
@@ -42,16 +40,13 @@ class TzTipBot():
 
         return outputs
 
-
     def ping(self, message):
         content = {"body": "pong", "msgtype": "m.notice"}
         return [content]
 
-
     def echo(self, message):
         content = {"body": f"message.body=\"{message['body']}\"", "msgtype": "m.notice"}
         return [content]
-
 
     def key(self, message):
         key = Key.from_alias("fy", tezos_client_dir=".")
@@ -61,13 +56,11 @@ class TzTipBot():
         content = code_notice(f"pkh = {pkh}")
         return [content]
 
-
     def head(self, message):
         header = self.rpcQuery.chains.main.blocks.head.header()
         body = pprint.pformat(header)
         content = code_notice(body)
         return [content]
-
 
     def sign(self, message):
         key = Key.from_alias("fy", tezos_client_dir=".")
@@ -80,7 +73,6 @@ class TzTipBot():
         }
         return [content]
 
-
     def constants(self, message):
         constants = self.rpcQuery.chains.main.blocks.head.context.constants()
         content = code_notice(pprint.pformat(constants))
@@ -88,13 +80,13 @@ class TzTipBot():
 
 
 def code_notice(code):
-        """ Create m.notice message content with formatted code """
-        return {
-            "body": code,
-            "formatted_body": "<pre><code>" + code + "</code></pre>",
-            "msgtype": "m.notice",
-            "format": "org.matrix.custom.html",
-        }
+    """ Create m.notice message content with formatted code """
+    return {
+        "body": code,
+        "formatted_body": "<pre><code>" + code + "</code></pre>",
+        "msgtype": "m.notice",
+        "format": "org.matrix.custom.html",
+    }
 
 
 # several alphanet accounts of mine

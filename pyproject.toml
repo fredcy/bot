@@ -8,6 +8,7 @@ authors = ["Fred Yankowski <fred@yankowski.com>"]
 python = "^3.7"
 matrix-nio = { git = "https://github.com/poljar/matrix-nio.git", branch = "master" }
 pytezos = "^2.0"
+aiofiles = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

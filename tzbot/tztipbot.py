@@ -75,12 +75,7 @@ class TzTipBot:
     def sign(self, message):
         key = Key.from_alias("fy", tezos_client_dir=".")
         signature = key.sign(message["body"])
-        content = {
-            "body": signature,
-            "formatted_body": "<pre><code>" + signature + "</code></pre>",
-            "msgtype": "m.notice",
-            "format": "org.matrix.custom.html",
-        }
+        content = code_notice(pprint.pformat(signature))
         return [content]
 
     def constants(self, message):

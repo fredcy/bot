@@ -14,6 +14,15 @@ class TzTipBot:
     def __init__(self, node_uri):
         self.node_uri = node_uri
         self.rpcQuery = RpcQuery(RpcNode(uri=self.node_uri))
+        self.testNodeConnection()
+
+
+    def testNodeConnection(self):
+        try:
+            header = self.rpcQuery.chains.main.blocks.head.header()        
+        except Exception as exc:
+            log.error(f"failed to connect to node {self.node_uri}: {exc}")
+
 
     def received_message(self, message):
         log.debug(f"message: {message}")

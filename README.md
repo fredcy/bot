@@ -9,7 +9,7 @@ On MacOS I have to install some system tools and libs first.
 ```
 brew install automake libtool libsodium
 ```
-The app depends on Python 3.7. I used [venv](https://github.com/pyenv/pyenv) to set a global environment for that.
+The app depends on Python 3.7. I used [pyenv](https://github.com/pyenv/pyenv) to set a global environment for that.
 
 Then, install the Python dependencies of the app.
 
